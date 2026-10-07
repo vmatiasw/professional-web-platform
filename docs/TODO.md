@@ -6,14 +6,15 @@
 - RLS para lectura pública limitada y escritura aislada por business.
 - Buckets de imágenes, videos y documentos con policies de Storage.
 - Clientes Supabase server/browser, tipos TypeScript y middleware de sesión.
-- `/login`, `/admin`, logout y placeholders públicos `/es/` y `/en/`.
+- `/login`, `/admin`, logout y sitio público funcional `/es/` y `/en/`.
+- CRUD de entries, imágenes, people, settings, business activo y traducción inglesa.
+- Business de prueba creado en Supabase y migraciones aplicadas y lintadas remotamente.
 
 ## Próximo
 
-- Aplicar la migración a un proyecto Supabase real y verificar RLS/Storage con dos businesses.
-- Crear el primer usuario Auth, membership owner y registro de Viola-Di Benedetto.
-- Implementar CRUD de entries y subida de media en el panel.
-- Añadir validación de formularios y selección explícita del business activo.
+- Crear el primer usuario Auth y asociarlo como owner siguiendo `docs/DATABASE.md`.
+- Verificar login, upload y aislamiento con dos usuarios reales.
+- Mejorar manejo de errores de formularios y validación de archivos.
 
 ## Próximo: sitio público
 
@@ -25,9 +26,8 @@
 
 ## Próximo: panel
 
-- Crear rutas protegidas y layout administrativo simple.
-- Resolver CRUD de entradas, media, orden, publicación y destacados.
-- Resolver administración de personas, CVs y contacto.
+- Mejorar manejo de errores y validación de archivos del panel.
+- Verificar upload, publicación y asociación de media con un usuario owner real.
 - Añadir previews del sitio sin convertir el panel en un editor visual libre.
 
 ## Futuro

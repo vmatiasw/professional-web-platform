@@ -1,7 +1,7 @@
 ---
 import '../../styles/global.css';
 import type { PublicSiteData } from '../../types/domain';
-import type { Business } from '../../types/database';
+import type { Business, Entry, EntryTranslation, Media, Person, SiteSettings } from '../../types/database';
 
 const locale = Astro.params.lang === 'en' ? 'en' : Astro.params.lang === 'es' ? 'es' : null;
 if (!locale) return Astro.redirect('/es/');
@@ -14,18 +14,29 @@ if (supabase) {
   const { data: businessRow } = await supabase.from('businesses').select('*').eq('slug', businessSlug).maybeSingle();
   const business = businessRow as unknown as Business | null;
   if (business) {
-    const [{ data: settings }, { data: entries }, { data: media }, { data: people }] = await Promise.all([
+    const [{ data: settingsRow }, { data: entryRows }, { data: mediaRows }, { data: peopleRows }] = await Promise.all([
       supabase.from('site_settings').select('*').eq('business_id', business.id).maybeSingle(),
       supabase.from('entries').select('*').eq('business_id', business.id).eq('published', true).order('sort_order'),
       supabase.from('media').select('*').eq('business_id', business.id).order('sort_order'),
       supabase.from('people').select('*').eq('business_id', business.id).eq('published', true).order('sort_order')
     ]);
-    site = { business, settings, entries: entries ?? [], media: media ?? [], people: people ?? [] };
+    const entries = (entryRows ?? []) as unknown as Entry[];
+    const { data: translationRows } = entries.length ? await supabase.from('entry_translations').select('*').in('entry_id', entries.map((entry) => entry.id)).eq('locale', locale) : { data: [] };
+    site = {
+      business,
+      settings: settingsRow as unknown as SiteSettings | null,
+      entries,
+      translations: (translationRows ?? []) as unknown as EntryTranslation[],
+      media: (mediaRows ?? []) as unknown as Media[],
+      people: (peopleRows ?? []) as unknown as Person[]
+    };
   }
 }
 
 const title = site?.settings?.public_name ?? site?.business.name ?? 'Visual Portfolio';
-const copy = locale === 'es' ? 'Sitio público en preparación.' : 'Public site in preparation.';
+const copy = locale === 'es' ? 'Contenido publicado desde el panel.' : 'Content published from the admin panel.';
+const entryTitle = (entry: Entry) => site?.translations.find((translation) => translation.entry_id === entry.id)?.title ?? entry.title;
+const publicMedia = site?.media.filter((item) => item.kind === 'image').slice(0, 12) ?? [];
 ---
 
 <html lang={locale}>
@@ -43,8 +54,11 @@ const copy = locale === 'es' ? 'Sitio público en preparación.' : 'Public site 
     <main class="mx-auto max-w-6xl px-6 py-24">
       <p class="text-sm uppercase tracking-[0.2em] text-stone-500">Visual Portfolio</p>
       <h1 class="mt-4 max-w-3xl text-5xl font-medium">{title}</h1>
-      <p class="mt-6 max-w-xl text-lg text-stone-600">{copy}</p>
-      {site?.entries.length ? <p class="mt-10 text-sm text-stone-500">{site.entries.length} entradas publicadas.</p> : null}
+      <p class="mt-6 max-w-xl text-lg text-stone-600">{site?.settings?.seo_description ?? copy}</p>
+      <section class="mt-16"><h2 class="text-2xl font-medium">{locale === 'es' ? 'Contenido' : 'Content'}</h2><div class="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{site?.entries.map((entry) => <article class="border border-stone-300 bg-white p-5"><p class="text-xs uppercase tracking-[0.15em] text-stone-500">{entry.type}</p><h3 class="mt-2 text-xl font-medium">{entryTitle(entry)}</h3>{entry.description && <p class="mt-3 text-sm text-stone-600">{entry.description}</p>}</article>)}</div></section>
+      {publicMedia.length > 0 && <section class="mt-16"><h2 class="text-2xl font-medium">{locale === 'es' ? 'Imágenes' : 'Images'}</h2><div class="mt-5 grid grid-cols-2 gap-3 md:grid-cols-4">{publicMedia.map((item) => <img src={supabase?.storage.from('site-images').getPublicUrl(item.storage_path).data.publicUrl} alt={item.alt_text ?? ''} width={item.width ?? 600} height={item.height ?? 450} loading="lazy" class="aspect-4/3 w-full object-cover" />)}</div></section>}
+      {site?.people.length ? <section class="mt-16"><h2 class="text-2xl font-medium">{locale === 'es' ? 'Estudio' : 'Studio'}</h2><div class="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{site.people.map((person) => <article class="border border-stone-300 bg-white p-5"><h3 class="font-medium">{person.name}</h3><p class="mt-1 text-sm text-stone-500">{person.role}</p>{person.bio && <p class="mt-3 text-sm text-stone-600">{person.bio}</p>}</article>)}</div></section> : null}
+      {(site?.settings?.email || site?.settings?.phone || site?.settings?.address) && <section class="mt-16 border-t border-stone-300 pt-6"><h2 class="text-2xl font-medium">{locale === 'es' ? 'Contacto' : 'Contact'}</h2><div class="mt-4 space-y-1 text-sm text-stone-600">{site.settings.email && <p>{site.settings.email}</p>}{site.settings.phone && <p>{site.settings.phone}</p>}{site.settings.address && <p>{site.settings.address}</p>}</div></section>}
     </main>
   </body>
 </html>

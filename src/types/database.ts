@@ -5,19 +5,22 @@ export type Database = {
     Tables: {
       businesses: { Row: Business; Insert: Partial<Business> & Pick<Business, 'name' | 'slug'>; Update: Partial<Business>; Relationships: [] };
       business_members: { Row: BusinessMember; Insert: BusinessMember; Update: Partial<BusinessMember>; Relationships: [] };
-      site_settings: { Row: SiteSettings; Insert: SiteSettings; Update: Partial<SiteSettings>; Relationships: [] };
+      site_settings: { Row: SiteSettings; Insert: Partial<SiteSettings> & Pick<SiteSettings, 'business_id'>; Update: Partial<SiteSettings>; Relationships: [] };
       entries: { Row: Entry; Insert: Partial<Entry> & Pick<Entry, 'business_id' | 'type' | 'title' | 'slug'>; Update: Partial<Entry>; Relationships: [] };
       entry_translations: { Row: EntryTranslation; Insert: EntryTranslation; Update: Partial<EntryTranslation>; Relationships: [] };
       media: { Row: Media; Insert: Partial<Media> & Pick<Media, 'business_id' | 'storage_path' | 'kind' | 'mime_type'>; Update: Partial<Media>; Relationships: [] };
       entry_media: { Row: EntryMedia; Insert: EntryMedia; Update: Partial<EntryMedia>; Relationships: [] };
       people: { Row: Person; Insert: Partial<Person> & Pick<Person, 'business_id' | 'name' | 'kind'>; Update: Partial<Person>; Relationships: [] };
     };
+    Views: { [_ in never]: never };
+    Functions: { [_ in never]: never };
     Enums: {
       business_member_role: 'owner' | 'editor';
       entry_type: 'project' | 'competition' | 'travel' | 'publication';
       media_kind: 'image' | 'video';
       person_kind: 'staff' | 'collaborator';
     };
+    CompositeTypes: { [_ in never]: never };
   };
 };
 

@@ -1,0 +1,20 @@
+---
+import '../../../styles/global.css';
+import { getBusinessContext } from '../../../lib/admin/business';
+import type { Entry } from '../../../types/database';
+
+const user = Astro.locals.user;
+const supabase = Astro.locals.supabase;
+const context = user && supabase ? await getBusinessContext(supabase, user, Astro.cookies) : { active: null, memberships: [] };
+const { data: entryData } = context.active && supabase
+  ? await supabase.from('entries').select('*').eq('business_id', context.active.business_id).order('sort_order').order('created_at', { ascending: false })
+  : { data: [] };
+const entries = (entryData ?? []) as unknown as Entry[];
+---
+
+<html lang="es"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width" /><title>Contenido | Administración</title></head>
+<body class="min-h-screen bg-stone-100 text-stone-900"><header class="border-b border-stone-300 bg-white"><div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-5"><a href="/admin" class="font-medium">Administración</a><form method="post" action="/api/logout"><button type="submit" class="text-sm underline">Cerrar sesión</button></form></div></header>
+<main class="mx-auto max-w-6xl px-6 py-10"><div class="flex items-end justify-between gap-4"><div><a href="/admin" class="text-sm text-stone-500">← Panel</a><h1 class="mt-2 text-4xl font-medium">Contenido</h1><p class="mt-2 text-stone-600">{context.active?.business.name ?? 'Sin business activo'}</p></div><a href="/admin/entries/new" class="bg-stone-900 px-4 py-3 text-sm text-white">Nuevo contenido</a></div>
+<div class="mt-8 overflow-x-auto border border-stone-300 bg-white"><table class="w-full min-w-[680px] text-left text-sm"><thead class="border-b border-stone-300 text-stone-500"><tr><th class="p-4">Título</th><th class="p-4">Tipo</th><th class="p-4">Estado</th><th class="p-4">Orden</th><th class="p-4">Acciones</th></tr></thead><tbody>
+{(entries ?? []).map((entry) => <tr class="border-b border-stone-200 last:border-0"><td class="p-4 font-medium">{entry.title}</td><td class="p-4">{entry.type}</td><td class="p-4">{entry.published ? 'Publicado' : 'Borrador'}{entry.featured ? ' · Destacado' : ''}</td><td class="p-4">{entry.sort_order}</td><td class="p-4"><div class="flex gap-3"><a class="underline" href={`/admin/entries/${entry.id}`}>Editar</a><form method="post" action="/api/admin/entries"><input type="hidden" name="_action" value="delete" /><input type="hidden" name="id" value={entry.id} /><button class="text-red-700 underline" type="submit">Eliminar</button></form></div></td></tr>)}
+{!entries?.length && <tr><td colspan="5" class="p-8 text-center text-stone-500">Todavía no hay contenido.</td></tr>}</tbody></table></div></main></body></html>

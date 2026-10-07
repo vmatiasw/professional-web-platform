@@ -32,6 +32,8 @@ Esta estructura es una propuesta inicial; no se deben crear todas las carpetas h
 
 La aplicación ya usa `output: 'server'` para que middleware y Auth puedan ejecutarse por request. El adaptador de Vercel empaqueta esa salida como una función serverless.
 
+El CMS mínimo usa páginas Astro y endpoints `APIRoute` server-side. El business activo se guarda en una cookie HttpOnly sólo después de comprobar que el usuario pertenece a ese business. Entries, media, people y settings vuelven a comprobar la membresía mediante la consulta server-side y RLS.
+
 ## Idiomas
 
 El MVP usará rutas explícitas `/es/` y `/en/`. Los campos visibles que necesiten traducción tendrán una estructura de traducción simple y acotada, inicialmente con valores `es` y `en`; no se incorporará un motor genérico de traducciones. Slugs y metadatos deben resolverse por idioma.
@@ -42,4 +44,4 @@ El origen será Supabase Storage. La migración inicial crea `site-images`, `sit
 
 ## Despliegue
 
-Astro usa el adaptador `@astrojs/vercel`. La configuración integra Tailwind 4 mediante `@tailwindcss/vite`, `@supabase/ssr` para cookies server-side y `@supabase/supabase-js` para el cliente tipado. La conexión se activa con `PUBLIC_SUPABASE_URL` y `PUBLIC_SUPABASE_PUBLISHABLE_KEY`; sin ellas el placeholder público sigue compilando, pero el panel redirige a login.
+Astro usa el adaptador `@astrojs/vercel`. La configuración integra Tailwind 4 mediante `@tailwindcss/vite`, `@supabase/ssr` para cookies server-side y `@supabase/supabase-js` para el cliente tipado. La conexión se activa con `PUBLIC_SUPABASE_URL` y `PUBLIC_SUPABASE_PUBLISHABLE_KEY`; sin ellas el placeholder público sigue compilando, pero el panel redirige a login. El proyecto remoto tiene aplicadas las migraciones inicial y de grants; el business de prueba `viola-di-benedetto` existe y todavía no hay usuario Auth inicial.

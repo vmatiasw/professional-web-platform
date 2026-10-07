@@ -12,6 +12,8 @@ npm run check
 npm run build
 ```
 
+Las migraciones remotas se verifican con `npx supabase migration list`, `npx supabase db lint --linked` y se aplican con `npx supabase db push --linked`.
+
 Para el servidor persistente de desarrollo usar `astro dev --background`; administrarlo con `astro dev stop`, `astro dev status` y `astro dev logs`.
 
 ## Criterios de producto
@@ -35,6 +37,8 @@ Para el servidor persistente de desarrollo usar `astro dev --background`; admini
 ## Verificación
 
 Antes de terminar un cambio importante ejecutar `npm run check` y `npm run build`. No guardar secretos en el repositorio. Las variables públicas de Supabase pueden exponerse al cliente, pero las políticas RLS deben impedir el acceso cruzado entre negocios.
+
+El panel usa `src/lib/admin/business.ts` para resolver el business activo desde membresías de Supabase. Los endpoints administrativos deben volver a validar esa membresía en el servidor; nunca confiar sólo en IDs enviados por formularios.
 
 ## Documentación de referencia
 

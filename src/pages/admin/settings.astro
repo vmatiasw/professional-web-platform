@@ -1,0 +1,14 @@
+---
+import '../../styles/global.css';
+import { getBusinessContext } from '../../lib/admin/business';
+import type { SiteSettings } from '../../types/database';
+
+const user = Astro.locals.user;
+const supabase = Astro.locals.supabase;
+const context = user && supabase ? await getBusinessContext(supabase, user, Astro.cookies) : { active: null, memberships: [] };
+const { data: settingsData } = context.active && supabase ? await supabase.from('site_settings').select('*').eq('business_id', context.active.business_id).maybeSingle() : { data: null };
+const settings = settingsData as unknown as SiteSettings | null;
+const socials = settings?.social_links && typeof settings.social_links === 'object' && !Array.isArray(settings.social_links) ? settings.social_links as Record<string, string> : {};
+---
+
+<html lang="es"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width" /><title>Configuración | Administración</title></head><body class="min-h-screen bg-stone-100 text-stone-900"><main class="mx-auto max-w-3xl px-6 py-10"><a href="/admin" class="text-sm text-stone-500">← Panel</a><h1 class="mt-2 text-4xl font-medium">Configuración del sitio</h1><p class="mt-2 text-stone-600">{context.active?.business.name}</p>{Astro.url.searchParams.get('saved') && <p class="mt-4 text-green-700">Cambios guardados.</p>}<form method="post" action="/api/admin/settings" class="mt-8 space-y-5 border border-stone-300 bg-white p-6"><label class="block text-sm">Nombre público<input name="public_name" value={settings?.public_name ?? ''} class="mt-2 block w-full border border-stone-300 px-3 py-2" /></label><label class="block text-sm">Descripción<textarea name="seo_description" rows="4" class="mt-2 block w-full border border-stone-300 px-3 py-2">{settings?.seo_description ?? ''}</textarea></label><div class="grid gap-5 sm:grid-cols-2"><label class="block text-sm">Email<input name="email" type="email" value={settings?.email ?? ''} class="mt-2 block w-full border border-stone-300 px-3 py-2" /></label><label class="block text-sm">Teléfono<input name="phone" value={settings?.phone ?? ''} class="mt-2 block w-full border border-stone-300 px-3 py-2" /></label></div><label class="block text-sm">Dirección<input name="address" value={settings?.address ?? ''} class="mt-2 block w-full border border-stone-300 px-3 py-2" /></label><h2 class="pt-3 text-lg font-medium">Redes sociales</h2>{['instagram','linkedin','facebook'].map((name) => <label class="block text-sm capitalize">{name}<input name={name} type="url" value={socials[name] ?? ''} class="mt-2 block w-full border border-stone-300 px-3 py-2" /></label>)}<button class="bg-stone-900 px-4 py-3 text-white" type="submit">Guardar configuración</button></form></main></body></html>

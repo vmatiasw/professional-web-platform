@@ -4,7 +4,7 @@ Supabase PostgreSQL es la fuente de verdad. Los archivos binarios no se guardan 
 
 ## Migración implementada
 
-El esquema está versionado en `supabase/migrations/20261007170000_initial_schema.sql`. Puede aplicarse con Supabase CLI (`supabase db push`) desde un proyecto enlazado, o ejecutarse en el SQL Editor de Supabase. Este repositorio no contiene credenciales ni un proyecto remoto enlazado, por lo que la aplicación automática y las pruebas contra PostgreSQL quedan pendientes de ese entorno.
+El esquema está versionado en `supabase/migrations/20261007170000_initial_schema.sql` y los grants API en `supabase/migrations/20261007212000_grant_api_roles.sql`. Ambas migraciones están aplicadas al proyecto Supabase configurado. `npx supabase db lint --linked` no reporta errores.
 
 ## Modelo implementado
 
@@ -51,3 +51,17 @@ El esquema está versionado en `supabase/migrations/20261007170000_initial_schem
 - Los slugs base son únicos por business; las traducciones son únicas por entry e idioma. La unicidad global de slugs traducidos queda para cuando el routing traducido se implemente.
 
 Para verificar aislamiento en un proyecto conectado, crear dos businesses y dos usuarios, asignar cada usuario a uno solo y probar lectura/escritura de tablas y Storage con ambos tokens. Esa verificación requiere un proyecto Supabase real y no se pudo ejecutar localmente.
+
+## Primer usuario y business
+
+El business `viola-di-benedetto` ya existe en el proyecto remoto. Para crear el primer owner, crear un usuario email/password desde Supabase Dashboard → Authentication → Users y ejecutar en el SQL Editor:
+
+```sql
+insert into public.business_members (business_id, user_id, role)
+select id, '<AUTH_USER_UUID>', 'owner'
+from public.businesses
+where slug = 'viola-di-benedetto'
+on conflict (business_id, user_id) do update set role = 'owner';
+```
+
+No se guardan emails ni contraseñas en el repositorio.
