@@ -2,7 +2,11 @@
 
 Supabase PostgreSQL es la fuente de verdad. Los archivos binarios no se guardan en tablas: imágenes, videos y CVs viven en Supabase Storage; la base guarda sus referencias y metadatos.
 
-## Modelo inicial
+## Migración implementada
+
+El esquema está versionado en `supabase/migrations/20261007170000_initial_schema.sql`. Puede aplicarse con Supabase CLI (`supabase db push`) desde un proyecto enlazado, o ejecutarse en el SQL Editor de Supabase. Este repositorio no contiene credenciales ni un proyecto remoto enlazado, por lo que la aplicación automática y las pruebas contra PostgreSQL quedan pendientes de ese entorno.
+
+## Modelo implementado
 
 ### `businesses`
 
@@ -34,15 +38,16 @@ Supabase PostgreSQL es la fuente de verdad. Los archivos binarios no se guardan 
 
 ### `people`
 
-`id`, `business_id`, `name`, `role`, `bio`, `photo_media_id`, `cv_storage_path`, `sort_order`, `kind` (`staff` o `collaborator`), timestamps.
+`id`, `business_id`, `name`, `role`, `bio`, `photo_media_id`, `cv_storage_path`, `sort_order`, `kind` (`staff` o `collaborator`), `published`, timestamps.
 
-## Reglas de integridad y seguridad
+## RLS y Storage implementados
 
 - Todas las tablas de negocio incluyen `business_id` directa o indirectamente y UUID como identificador.
 - Índices iniciales: `(business_id, type, published, sort_order)`, `(business_id, slug)` y membresías por `user_id`.
-- RLS debe permitir leer y modificar datos sólo a miembros del negocio correspondiente.
-- El sitio público sólo lee entradas publicadas y media asociada.
-- Las policies de Storage deben separar los paths por negocio y aplicar el mismo control de membresía.
-- Los slugs deben ser únicos por negocio e idioma.
+- RLS está habilitado en todas las tablas. Las funciones `is_business_member`, `is_business_editor` e `is_business_owner` son `security definer` y centralizan la pertenencia sin exponer consultas recursivas.
+- Los editores y owners pueden modificar únicamente filas de su business; los owners administran membresías.
+- El sitio público sólo lee entradas, traducciones, media asociada y personas publicadas.
+- Los buckets `site-images`, `site-videos` y `site-documents` usan paths `business/{business_id}/...`; las policies de escritura validan la membresía contra el primer segmento. CVs/documentos son privados; imágenes y videos son públicos para servir el sitio.
+- Los slugs base son únicos por business; las traducciones son únicas por entry e idioma. La unicidad global de slugs traducidos queda para cuando el routing traducido se implemente.
 
-El esquema real se incorporará mediante migraciones versionadas en `supabase/migrations/` cuando comience la implementación, después de validar estos campos con el contenido real.
+Para verificar aislamiento en un proyecto conectado, crear dos businesses y dos usuarios, asignar cada usuario a uno solo y probar lectura/escritura de tablas y Storage con ambos tokens. Esa verificación requiere un proyecto Supabase real y no se pudo ejecutar localmente.

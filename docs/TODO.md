@@ -1,13 +1,21 @@
 # Próximos pasos
 
-## Siguiente etapa
+## Hecho
 
-- Crear la primera migración Supabase con `businesses`, membresías, settings, entries, media, relaciones y people.
-- Definir buckets, convenciones de paths y policies RLS/Storage.
-- Crear clientes server/browser de Supabase y el flujo mínimo de autenticación.
-- Implementar tipos y validaciones compartidas para las entidades del MVP.
+- Migración inicial con tablas de contenido, media, personas y membresías.
+- RLS para lectura pública limitada y escritura aislada por business.
+- Buckets de imágenes, videos y documentos con policies de Storage.
+- Clientes Supabase server/browser, tipos TypeScript y middleware de sesión.
+- `/login`, `/admin`, logout y placeholders públicos `/es/` y `/en/`.
 
-## Sitio público
+## Próximo
+
+- Aplicar la migración a un proyecto Supabase real y verificar RLS/Storage con dos businesses.
+- Crear el primer usuario Auth, membership owner y registro de Viola-Di Benedetto.
+- Implementar CRUD de entries y subida de media en el panel.
+- Añadir validación de formularios y selección explícita del business activo.
+
+## Próximo: sitio público
 
 - Definir el shell bilingüe y las rutas `/es/` y `/en/`.
 - Implementar SEO compartido: title, description, canonical, Open Graph, Twitter/X, sitemap y robots.
@@ -15,16 +23,16 @@
 - Implementar imágenes responsive con dimensiones explícitas, lazy loading y formatos optimizados.
 - Validar la experiencia con mobile, teclado, lector de pantalla y contenido sin JavaScript.
 
-## Panel
+## Próximo: panel
 
 - Crear rutas protegidas y layout administrativo simple.
 - Resolver CRUD de entradas, media, orden, publicación y destacados.
 - Resolver administración de personas, CVs y contacto.
 - Añadir previews del sitio sin convertir el panel en un editor visual libre.
 
-## Validación
+## Futuro
 
-- Cargar un conjunto pequeño de contenido real de Viola-Di Benedetto.
-- Revisar copy y traducciones con el cliente.
-- Medir imágenes, Core Web Vitals, accesibilidad y metadata.
-- Configurar variables de entorno y proyecto Vercel/Supabase fuera del repositorio.
+- Diseño final de Viola-Di Benedetto y template Visual Portfolio.
+- Procesamiento avanzado de imágenes, videos y previews.
+- Recuperación de contraseña, invitaciones y permisos avanzados.
+- Analytics, integraciones externas, billing y otros templates.

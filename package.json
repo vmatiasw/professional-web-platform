@@ -15,6 +15,8 @@
   "dependencies": {
     "@astrojs/check": "^0.9.10",
     "@astrojs/vercel": "^11.0.12",
+    "@supabase/ssr": "^0.12.7",
+    "@supabase/supabase-js": "^2.117.3",
     "@tailwindcss/vite": "^4.3.3",
     "astro": "^7.3.6",
     "tailwindcss": "^4.3.3",
@@ -22,5 +24,8 @@
   },
   "allowScripts": {
     "esbuild": true
+  },
+  "devDependencies": {
+    "supabase": "^2.120.0"
   }
 }

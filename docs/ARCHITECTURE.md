@@ -30,14 +30,16 @@ Esta estructura es una propuesta inicial; no se deben crear todas las carpetas h
 4. Las imágenes y CVs se suben a Supabase Storage y las tablas guardan su path y metadatos.
 5. El sitio público consulta sólo contenido publicado del negocio configurado y genera URLs limpias por idioma y slug.
 
+La aplicación ya usa `output: 'server'` para que middleware y Auth puedan ejecutarse por request. El adaptador de Vercel empaqueta esa salida como una función serverless.
+
 ## Idiomas
 
 El MVP usará rutas explícitas `/es/` y `/en/`. Los campos visibles que necesiten traducción tendrán una estructura de traducción simple y acotada, inicialmente con valores `es` y `en`; no se incorporará un motor genérico de traducciones. Slugs y metadatos deben resolverse por idioma.
 
 ## Media y performance
 
-El origen será Supabase Storage. El componente de media debe recibir dimensiones, texto alternativo, orden y prioridad de carga, y producir imágenes responsive con formatos modernos cuando estén disponibles. Las dimensiones explícitas evitarán layout shift; la carga diferida será el comportamiento por defecto fuera del primer viewport.
+El origen será Supabase Storage. La migración inicial crea `site-images`, `site-videos` y `site-documents`; los dos primeros son públicos para recursos publicados y los documentos son privados. El componente de media debe recibir dimensiones, texto alternativo, orden y prioridad de carga, y producir imágenes responsive con formatos modernos cuando estén disponibles. Las dimensiones explícitas evitarán layout shift; la carga diferida será el comportamiento por defecto fuera del primer viewport.
 
 ## Despliegue
 
-Astro usa el adaptador `@astrojs/vercel`. La configuración actual ya integra Tailwind 4 mediante `@tailwindcss/vite` y produce un build estático compatible con Vercel. Supabase se conectará cuando exista la primera migración y el flujo de autenticación.
+Astro usa el adaptador `@astrojs/vercel`. La configuración integra Tailwind 4 mediante `@tailwindcss/vite`, `@supabase/ssr` para cookies server-side y `@supabase/supabase-js` para el cliente tipado. La conexión se activa con `PUBLIC_SUPABASE_URL` y `PUBLIC_SUPABASE_PUBLISHABLE_KEY`; sin ellas el placeholder público sigue compilando, pero el panel redirige a login.

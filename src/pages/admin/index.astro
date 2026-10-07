@@ -1,0 +1,56 @@
+---
+import '../../styles/global.css';
+
+const user = Astro.locals.user;
+const supabase = Astro.locals.supabase;
+let memberships: Array<{ business_id: string; role: string; business: { name: string; slug: string } | null }> = [];
+type MembershipRow = { business_id: string; role: string; businesses: { name: string; slug: string } | { name: string; slug: string }[] | null };
+
+if (user && supabase) {
+  const { data } = await supabase
+    .from('business_members')
+    .select('business_id, role, businesses (name, slug)')
+    .eq('user_id', user.id);
+  memberships = (data ?? []).map((membership: MembershipRow) => ({
+    business_id: membership.business_id,
+    role: membership.role,
+    business: Array.isArray(membership.businesses) ? membership.businesses[0] ?? null : membership.businesses
+  }));
+}
+---
+
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Administración | Professional Web Platform</title>
+  </head>
+  <body class="min-h-screen bg-stone-100 text-stone-900">
+    <header class="border-b border-stone-300 bg-white">
+      <div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
+        <a href="/admin" class="font-medium">Professional Web Platform</a>
+        <form method="post" action="/api/logout"><button type="submit" class="text-sm underline">Cerrar sesión</button></form>
+      </div>
+    </header>
+    <main class="mx-auto max-w-6xl px-6 py-12">
+      <p class="text-sm text-stone-500">Sesión activa: {user?.email}</p>
+      <h1 class="mt-2 text-4xl font-medium">Panel administrativo</h1>
+      <section class="mt-10 grid gap-4 md:grid-cols-4">
+        {['Contenido', 'Multimedia', 'Personas', 'Configuración'].map((label) => (
+          <a href="#" class="border border-stone-300 bg-white p-5 hover:border-stone-900">
+            <h2 class="font-medium">{label}</h2>
+            <p class="mt-2 text-sm text-stone-500">Próximamente</p>
+          </a>
+        ))}
+      </section>
+      <section class="mt-10 border border-stone-300 bg-white p-6">
+        <h2 class="text-xl font-medium">Businesses disponibles</h2>
+        {memberships.length ? (
+          <ul class="mt-4 space-y-3">
+            {memberships.map(({ business_id, role, business }) => <li class="flex justify-between border-t border-stone-200 pt-3"><span>{business?.name ?? business_id}</span><span class="text-sm text-stone-500">{role}</span></li>)}
+          </ul>
+        ) : <p class="mt-4 text-sm text-stone-500">No hay un business asociado a este usuario.</p>}
+      </section>
+    </main>
+  </body>
+</html>

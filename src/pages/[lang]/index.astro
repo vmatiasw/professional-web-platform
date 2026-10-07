@@ -1,0 +1,50 @@
+---
+import '../../styles/global.css';
+import type { PublicSiteData } from '../../types/domain';
+import type { Business } from '../../types/database';
+
+const locale = Astro.params.lang === 'en' ? 'en' : Astro.params.lang === 'es' ? 'es' : null;
+if (!locale) return Astro.redirect('/es/');
+
+const businessSlug = import.meta.env.PUBLIC_SITE_BUSINESS_SLUG ?? 'viola-di-benedetto';
+const supabase = Astro.locals.supabase;
+let site: PublicSiteData | null = null;
+
+if (supabase) {
+  const { data: businessRow } = await supabase.from('businesses').select('*').eq('slug', businessSlug).maybeSingle();
+  const business = businessRow as unknown as Business | null;
+  if (business) {
+    const [{ data: settings }, { data: entries }, { data: media }, { data: people }] = await Promise.all([
+      supabase.from('site_settings').select('*').eq('business_id', business.id).maybeSingle(),
+      supabase.from('entries').select('*').eq('business_id', business.id).eq('published', true).order('sort_order'),
+      supabase.from('media').select('*').eq('business_id', business.id).order('sort_order'),
+      supabase.from('people').select('*').eq('business_id', business.id).eq('published', true).order('sort_order')
+    ]);
+    site = { business, settings, entries: entries ?? [], media: media ?? [], people: people ?? [] };
+  }
+}
+
+const title = site?.settings?.public_name ?? site?.business.name ?? 'Visual Portfolio';
+const copy = locale === 'es' ? 'Sitio público en preparación.' : 'Public site in preparation.';
+---
+
+<html lang={locale}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="description" content={site?.settings?.seo_description ?? copy} />
+    <title>{title}</title>
+  </head>
+  <body class="min-h-screen bg-stone-100 text-stone-900">
+    <header class="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
+      <a href={`/${locale}/`} class="font-medium">{title}</a>
+      <nav class="flex gap-4 text-sm"><a href="/es/">ES</a><a href="/en/">EN</a></nav>
+    </header>
+    <main class="mx-auto max-w-6xl px-6 py-24">
+      <p class="text-sm uppercase tracking-[0.2em] text-stone-500">Visual Portfolio</p>
+      <h1 class="mt-4 max-w-3xl text-5xl font-medium">{title}</h1>
+      <p class="mt-6 max-w-xl text-lg text-stone-600">{copy}</p>
+      {site?.entries.length ? <p class="mt-10 text-sm text-stone-500">{site.entries.length} entradas publicadas.</p> : null}
+    </main>
+  </body>
+</html>
