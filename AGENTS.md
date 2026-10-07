@@ -1,22 +1,45 @@
-## Development
+# Professional Web Platform
 
-When starting the dev server, use background mode:
+## Desarrollo
 
+El proyecto es una única aplicación Astro con TypeScript, Tailwind CSS, Supabase y despliegue en Vercel. El sitio público debe priorizar HTML renderizado por Astro, imágenes optimizadas y JavaScript únicamente cuando sea necesario.
+
+Comandos principales:
+
+```sh
+npm run dev
+npm run check
+npm run build
 ```
-astro dev --background
-```
 
-Manage the background server with `astro dev stop`, `astro dev status`, and `astro dev logs`.
+Para el servidor persistente de desarrollo usar `astro dev --background`; administrarlo con `astro dev stop`, `astro dev status` y `astro dev logs`.
 
-## Documentation
+## Criterios de producto
 
-Full documentation: https://docs.astro.build
+- El equipo de software controla templates, componentes y presentación.
+- El cliente administra contenido estructurado, no diseña páginas libremente.
+- Supabase/PostgreSQL es la fuente de verdad; los archivos viven en Supabase Storage.
+- Todo dato de negocio debe quedar aislado por `business_id` mediante RLS.
+- Mantener el MVP pequeño: no agregar page builder, backend separado, GraphQL, Prisma, Redis ni Docker sin una necesidad concreta.
 
-Consult these guides before working on related tasks:
+## Organización esperada
 
-- [Adding pages, dynamic routes, or middleware](https://docs.astro.build/en/guides/routing/)
-- [Working with Astro components](https://docs.astro.build/en/basics/astro-components/)
-- [Using React, Vue, Svelte, or other framework components](https://docs.astro.build/en/guides/framework-components/)
-- [Adding or managing content](https://docs.astro.build/en/guides/content-collections/)
-- [Adding styles or using Tailwind](https://docs.astro.build/en/guides/styling/)
-- [Supporting multiple languages](https://docs.astro.build/en/guides/internationalization/)
+- `src/pages/`: rutas públicas y administrativas.
+- `src/components/`: componentes visuales reutilizables del template.
+- `src/layouts/`: layouts y metadatos compartidos.
+- `src/lib/`: clientes de Supabase, consultas y utilidades de dominio.
+- `src/content/`: tipos, validaciones y datos estáticos del sistema cuando corresponda.
+- `supabase/`: migraciones, políticas RLS y configuración de base de datos.
+- `public/`: archivos estáticos pequeños; las imágenes y CVs de clientes van en Storage.
+
+## Verificación
+
+Antes de terminar un cambio importante ejecutar `npm run check` y `npm run build`. No guardar secretos en el repositorio. Las variables públicas de Supabase pueden exponerse al cliente, pero las políticas RLS deben impedir el acceso cruzado entre negocios.
+
+## Documentación de referencia
+
+- Producto: `docs/PRODUCT.md`
+- Arquitectura: `docs/ARCHITECTURE.md`
+- Base de datos: `docs/DATABASE.md`
+- Próximos pasos: `docs/TODO.md`
+- Guías oficiales de Astro: [docs.astro.build](https://docs.astro.build)
